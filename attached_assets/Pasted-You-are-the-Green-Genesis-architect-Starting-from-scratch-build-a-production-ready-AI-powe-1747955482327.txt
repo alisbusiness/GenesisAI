@@ -1,0 +1,236 @@
+You are the Green Genesis architect.  Starting from scratch, build a **production-ready**, **AI-powered** precision-farming platform that:
+
+1. Streams live sensor & camera data from an Arduino over serial (via PySerial)  
+2. Displays real-time dashboards (public) and an **admin settings** panel (protected)  
+3. Integrates GPT-4.1 vision and chat for plant-health insights  
+4. Supports **10 example plant species** with individualized ideal ranges  
+5. Shows current actuator states and lets admins toggle them & adjust thresholds  
+6. Runs on Raspberry Pi OS automatically provisioning PostgreSQL, Python, Node, etc.  
+7. Delivers a “wow factor” with extra AI features for judges
+
+────────────────────────────────────────────────────────  
+## PROJECT STRUCTURE  
+/
+├── api/ # Flask backend
+│ ├── app/
+│ │ ├── main.py # Flask app & blueprint registration
+│ │ ├── routes/
+│ │ │ ├── health.py # /api/health endpoints
+│ │ │ ├── admin.py # /admin/login & /admin/settings & /admin/command
+│ │ ├── services/
+│ │ │ ├── camera.py # grab_frame()
+│ │ │ ├── analysis.py # analyse() via OpenAI
+│ │ │ ├── serial_comm.py# PySerial read_loop & send_command
+│ │ │ └── ai_utils.py # anomaly detection, trend forecasting
+│ │ ├── models.py # SQLAlchemy: Admin, Setting, Telemetry
+│ │ └── scheduler.py # background analysis & recommendations
+│ ├── requirements.txt
+│ └── wsgi.py
+│
+├── web/ # React frontend
+│ ├── src/
+│ │ ├── pages/
+│ │ │ ├── PublicDashboard.tsx
+│ │ │ ├── PlantHealth.tsx
+│ │ │ ├── AdminLogin.tsx
+│ │ │ └── AdminSettings.tsx
+│ │ ├── components/
+│ │ │ ├── CameraViewer.tsx
+│ │ │ ├── SensorChart.tsx
+│ │ │ ├── HealthCard.tsx
+│ │ │ ├── AnalysisChat.tsx # GPT-chat assistant
+│ │ │ └── ActuatorPanel.tsx
+│ └── package.json
+│
+├── docs/
+│ └── INSTALL.md
+│
+├── setup.sh
+├── start.sh
+└── .env.template
+
+bash
+Copy
+Edit
+
+────────────────────────────────────────────────────────  
+## GLOBAL OBJECTIVES  
+- **Public** pages at `/` & `/health` show latest sensor + camera + AI analysis.  
+- **Admin** pages under `/admin` require login **Infomatrix / Infomatrix2025MKA** (bcrypt hash in PostgreSQL).  
+- **10 plant species** (e.g. Tomato, Lettuce, Strawberry, Basil, Cucumber, Pepper, Spinach, Kale, Mint, Orchid) each with ideal ranges:  
+  ```json
+  {
+    "Tomato":   {"temp":[18,27],"humidity":[60,80],"soilMoisture":[0.6,0.8],"co2":[400,800]},
+    "Lettuce":  {"temp":[15,20],"humidity":[70,90],"soilMoisture":[0.7,0.9],"co2":[400,600]},
+    …etc…
+  }
+Actuators (Pump, Vent, Light, Fan) states shown live and togglable in admin.
+
+AI Enhancements:
+
+Anomaly Detection: flag out-of-range sensors & alert admins
+
+Trend Forecasting: use OpenAI to predict next-hour sensor drift
+
+Chat Assistant: GPT-4.1 chat UI (AnalysisChat.tsx) for plant-health Q&A
+
+Auto-Recommendations: natural-language action plans pushed every 30 min
+
+────────────────────────────────────────────────────────
+
+TASK A | ENVIRONMENT & SETUP SCRIPTS
+.env.template:
+
+makefile
+Copy
+Edit
+# Serial
+SERIAL_PORT=/dev/ttyUSB0
+SERIAL_BAUD=9600
+
+# OpenAI
+OPENAI_API_KEY=
+
+# Admin
+ADMIN_USER=Infomatrix
+ADMIN_PASS_HASH=$2b$12$…bcrypt hash of Infomatrix2025MKA…
+
+# Database
+POSTGRES_USER=gguser
+POSTGRES_PASS=password
+POSTGRES_DB=greengenesis
+
+# Camera
+CAMERA_RTSP_URL=
+
+# Analysis interval (min)
+ANALYSIS_INTERVAL=30
+setup.sh:
+
+bash
+Copy
+Edit
+#!/usr/bin/env bash
+set -e
+echo "🔧 Updating & installing system packages..."
+sudo apt-get update
+sudo apt-get install -y python3-venv python3-pip nodejs npm postgresql postgresql-contrib ffmpeg
+
+echo "🐍 Setting up Python venv & deps..."
+cd api
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+deactivate
+
+echo "🗄️ Configuring PostgreSQL..."
+sudo -u postgres psql -c "CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASS';" || true
+sudo -u postgres psql -c "CREATE DATABASE $POSTGRES_DB OWNER $POSTGRES_USER;" || true
+
+echo "📦 Installing React dependencies..."
+cd ../web
+npm install
+
+echo "⚙️ Copy .env.template to .env and fill in credentials"
+cp ../.env.template ../.env
+
+echo "✅ Setup complete! Run ./start.sh to launch."
+start.sh:
+
+bash
+Copy
+Edit
+#!/usr/bin/env bash
+set -e
+echo "🚀 Starting backend..."
+cd api
+source venv/bin/activate
+export FLASK_APP=app/main.py
+nohup flask run --host=0.0.0.0 --port=8000 > backend.log 2>&1 &
+
+echo "🚀 Starting frontend..."
+cd ../web
+npm run start
+Make both scripts executable:
+
+bash
+Copy
+Edit
+chmod +x setup.sh start.sh
+────────────────────────────────────────────────────────
+
+TASK B | FLASK BACKEND
+app/main.py: create Flask app, CORS, SQLAlchemy, Blueprints, WebSocket (via Flask-SocketIO).
+
+routes/health.py:
+
+py
+Copy
+Edit
+@bp.get("/snapshot")
+def snapshot(): return Response(grab_frame(), mimetype="image/jpeg")
+@bp.post("/")
+def analyse_now(): return analyse(grab_frame())
+routes/admin.py:
+
+py
+Copy
+Edit
+@bp.post("/login")   # check ADMIN_USER & bcrypt
+@bp.get("/settings") # return plant config, thresholds
+@bp.put("/settings") # update config & actuator defaults
+@bp.post("/command") # send_command(cmd,params)
+services/serial_comm.py: implement init_serial(), read_loop() parsing EXACT JSON types (telemetry, ack, error), save to DB, emit SocketIO events; send_command().
+
+services/analysis.py: call OpenAI chat completions & vision preview, parse JSON into {score,problems,actions}.
+
+services/ai_utils.py: add anomaly detection (e.g. Z-score) and trend forecasting using GPT.
+
+scheduler.py: background thread reading ANALYSIS_INTERVAL to auto-analyse & broadcast.
+
+models.py: SQLAlchemy models for Admin, Setting, Telemetry, ActuatorLog.
+
+────────────────────────────────────────────────────────
+
+TASK C | REACT FRONTEND
+PublicDashboard.tsx: subscribe WebSocket → update SensorChart & CameraViewer.
+
+PlantHealth.tsx: “Analyse Now” button → fetch("/api/health"), show HealthCard.
+
+AdminLogin.tsx: form POST to /admin/login, store cookie.
+
+AdminSettings.tsx: protected route → fetch/update plant configs & actuator toggles.
+
+AnalysisChat.tsx: chat UI → POST /api/analysis-chat for general Q&A.
+
+Use Tailwind + shadcn/ui for 2-column responsive layout, Framer Motion for card animations.
+
+────────────────────────────────────────────────────────
+
+TASK D | EXTRA AI “WOW” FEATURES
+Predictive Alerts: detect when sensors will breach ideal ranges in next hour using GPT.
+
+Dynamic Plant Profiles: auto-suggest new plant species from a stored list via AI.
+
+Voice Assistant: integrate Web Speech API to ask “What’s wrong with my tomato?” → chat reply.
+
+Historical Trends: store telemetry in PostgreSQL + timescale projections + display sparkline charts.
+
+────────────────────────────────────────────────────────
+
+TASK E | TESTING & DOCUMENTATION
+pytest: mock serial input, test all routes.
+
+Vitest: component tests.
+
+Playwright: E2E for public dashboard and admin login/settings.
+
+docs/INSTALL.md: full Pi OS instructions, serial permission (sudo usermod -aG dialout $USER), example JSON messages, troubleshooting.
+
+────────────────────────────────────────────────────────
+Commit series in logical chunks. After running ./setup.sh && ./start.sh,
+visit http://<pi_ip>:3000/ (public) and http://<pi_ip>:3000/admin
+with Infomatrix/Infomatrix2025MKA to configure.
+Your judges will be impressed by the AI-driven insights, real-time visuals,
+and robust admin controls!
