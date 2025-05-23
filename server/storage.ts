@@ -49,6 +49,9 @@ export interface IStorage {
   getSetting(key: string): Promise<Setting | undefined>;
   setSetting(setting: InsertSetting): Promise<Setting>;
   getAllSettings(): Promise<Setting[]>;
+
+  // Chat management
+  clearChatHistory(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -212,6 +215,10 @@ export class DatabaseStorage implements IStorage {
 
   async getAllSettings(): Promise<Setting[]> {
     return await db.select().from(settings);
+  }
+
+  async clearChatHistory(): Promise<void> {
+    await db.delete(chatMessages);
   }
 }
 

@@ -474,9 +474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Clear chat history from database
       console.log('Clearing chat history...');
-      
-      // For now, we'll just acknowledge the clear request
-      // In production, you'd implement: await storage.clearChatHistory();
+      await storage.clearChatHistory();
       
       res.json({ success: true, message: 'Chat history cleared' });
     } catch (error) {
