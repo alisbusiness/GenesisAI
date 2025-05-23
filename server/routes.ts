@@ -268,12 +268,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Chat endpoints
   app.post('/api/chat', async (req, res) => {
     try {
-      const validation = insertChatMessageSchema.safeParse(req.body);
-      if (!validation.success) {
-        return res.status(400).json({ error: 'Invalid message format' });
+      const { message, isAdmin = false } = req.body;
+      
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ error: 'Message is required' });
       }
-
-      const { message, isAdmin } = validation.data;
+      
+      console.log('Received chat message:', message);
 
       // Get current context for AI
       const currentPlant = await storage.getCurrentPlant();
