@@ -16,6 +16,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Initialize serial communication
   await initializeSerial(wss);
+  
+  // Start sensor simulation for demo (replaces Arduino when not connected)
+  const { startSensorSimulation } = await import('./simulator');
+  startSensorSimulation(wss);
 
   // Middleware for admin authentication
   const requireAdmin = async (req: any, res: any, next: any) => {
