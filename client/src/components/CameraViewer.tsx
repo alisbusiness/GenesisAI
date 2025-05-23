@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Camera, Wifi, WifiOff, RefreshCw } from "lucide-react";
 import { useState } from "react";
-import plantPlaceholder from "@assets/4d10f3c5-2653-423c-8319-9d47bef1e5aa.jpeg";
+import plantImage from "@assets/image_1748001658153.png";
 
 interface CameraViewerProps {
   analysis?: {
@@ -69,7 +69,7 @@ export default function CameraViewer({ analysis }: CameraViewerProps) {
           {/* Camera Feed Display */}
           <div className="aspect-video bg-slate-100 rounded-lg overflow-hidden relative">
             <img
-              src={plantPlaceholder}
+              src={plantImage}
               alt="Plant Camera Feed"
               className="w-full h-full object-cover"
             />
