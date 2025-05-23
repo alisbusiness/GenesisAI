@@ -1,8 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Camera, Wifi, WifiOff, RefreshCw } from "lucide-react";
+import { Camera, Wifi, WifiOff, RefreshCw, Brain } from "lucide-react";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import plantImage from "@assets/image_1748001658153.png";
 
 interface CameraViewerProps {
@@ -18,6 +21,53 @@ interface CameraViewerProps {
 export default function CameraViewer({ analysis }: CameraViewerProps) {
   const [isCapturing, setIsCapturing] = useState(false);
   const [cameraConnected, setCameraConnected] = useState(true);
+  const { toast } = useToast();
+
+  // Convert plant image to base64 for AI analysis
+  const convertImageToBase64 = async (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx?.drawImage(img, 0, 0);
+        const dataURL = canvas.toDataURL('image/png');
+        const base64 = dataURL.split(',')[1];
+        resolve(base64);
+      };
+      img.onerror = reject;
+      img.src = plantImage;
+    });
+  };
+
+  // AI Analysis mutation
+  const analyzeImageMutation = useMutation({
+    mutationFn: async () => {
+      const base64Image = await convertImageToBase64();
+      const response = await apiRequest('POST', '/api/health/analyze', {
+        imageData: base64Image,
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/health/analyze'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ai/analysis/history'] });
+      toast({
+        title: "AI Analysis Complete",
+        description: "Your plant has been analyzed successfully with AI vision.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Analysis Failed",
+        description: error.message || "Failed to analyze plant image",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleCapture = () => {
     setIsCapturing(true);
@@ -25,6 +75,10 @@ export default function CameraViewer({ analysis }: CameraViewerProps) {
     setTimeout(() => {
       setIsCapturing(false);
     }, 2000);
+  };
+
+  const handleAIAnalysis = () => {
+    analyzeImageMutation.mutate();
   };
 
   return (
@@ -48,19 +102,34 @@ export default function CameraViewer({ analysis }: CameraViewerProps) {
               )}
             </Badge>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCapture}
-            disabled={isCapturing}
-            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-          >
-            {isCapturing ? (
-              <RefreshCw className="h-4 w-4 animate-spin" />
-            ) : (
-              <Camera className="h-4 w-4" />
-            )}
-          </Button>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCapture}
+              disabled={isCapturing}
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+            >
+              {isCapturing ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <Camera className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAIAnalysis}
+              disabled={analyzeImageMutation.isPending}
+              className="text-green-600 hover:text-green-700 hover:bg-green-50"
+            >
+              {analyzeImageMutation.isPending ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <Brain className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
         </CardTitle>
       </CardHeader>
       

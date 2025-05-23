@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import plantImage from "@assets/image_1748001658153.png";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -51,6 +54,53 @@ interface AiAnalysis {
 
 export default function PublicDashboard() {
   const [selectedMetric, setSelectedMetric] = useState<'overview' | 'health' | 'environment' | 'growth'>('overview');
+  const { toast } = useToast();
+
+  // Convert plant image to base64 for AI analysis
+  const convertImageToBase64 = async (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx?.drawImage(img, 0, 0);
+        const dataURL = canvas.toDataURL('image/png');
+        const base64 = dataURL.split(',')[1];
+        resolve(base64);
+      };
+      img.onerror = reject;
+      img.src = plantImage;
+    });
+  };
+
+  // AI Health Scan mutation
+  const healthScanMutation = useMutation({
+    mutationFn: async () => {
+      const base64Image = await convertImageToBase64();
+      const response = await apiRequest('POST', '/api/health/analyze', {
+        imageData: base64Image,
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/health/analyze'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ai/analysis/history'] });
+      toast({
+        title: "AI Health Scan Complete",
+        description: "Your plant has been analyzed with advanced AI vision.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Health Scan Failed",
+        description: error.message || "Failed to analyze plant image",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Fetch latest telemetry data
   const { data: latestTelemetry, isLoading } = useQuery<TelemetryData>({
@@ -320,9 +370,13 @@ export default function PublicDashboard() {
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="grid grid-cols-3 gap-2">
-                  <Button className="bg-emerald-600 hover:bg-emerald-700 h-9 text-xs font-semibold">
+                  <Button 
+                    className="bg-emerald-600 hover:bg-emerald-700 h-9 text-xs font-semibold"
+                    onClick={() => healthScanMutation.mutate()}
+                    disabled={healthScanMutation.isPending}
+                  >
                     <Camera className="h-3 w-3 mr-1" />
-                    Scan
+                    {healthScanMutation.isPending ? 'Scanning...' : 'Scan'}
                   </Button>
                   <Button variant="outline" className="hover:bg-emerald-50 h-9 text-xs">
                     <Brain className="h-3 w-3 mr-1" />
