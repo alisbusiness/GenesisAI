@@ -30,7 +30,7 @@ interface ChatContext {
 export async function analyzeImageWithAI(base64Image: string): Promise<PlantAnalysisResult> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-4.1", // Updated to GPT-4.1 as requested
       messages: [
         {
           role: "system",
@@ -119,7 +119,7 @@ export async function chatWithAI(message: string, context: ChatContext): Promise
     Provide helpful, actionable advice based on the user's question and the current system context. Keep responses concise but informative.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-4.1", // Updated to GPT-4.1 as requested
       messages: [
         {
           role: "system",
