@@ -147,7 +147,7 @@ export default function AnalysisChat() {
       
       <CardContent className="flex-1 flex flex-col p-4">
         {/* Chat Messages */}
-        <ScrollArea className="flex-1 mb-4 h-[400px]">
+        <ScrollArea className="flex-1 mb-4 h-[200px]">
           <div className="space-y-4 p-2">
             {chatHistory && chatHistory.length > 0 ? (
               chatHistory.map((chat) => (

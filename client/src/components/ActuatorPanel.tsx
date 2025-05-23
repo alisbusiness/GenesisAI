@@ -108,20 +108,20 @@ export default function ActuatorPanel() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+    <div>
+      <div className="mb-3">
+        <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Settings className="h-5 w-5 text-green-600" />
-            <span>Actuator Controls</span>
+            <Settings className="h-4 w-4 text-green-600" />
+            <span className="text-sm font-medium">Actuator Controls</span>
           </div>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span className="text-sm text-slate-600">Auto Mode</span>
+            <span className="text-xs text-slate-600">Auto Mode</span>
           </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+        </div>
+      </div>
+      <div>
         {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3, 4].map(i => (
@@ -131,11 +131,11 @@ export default function ActuatorPanel() {
             ))}
           </div>
         ) : actuators && actuators.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {actuators.map((actuator) => (
               <div 
                 key={actuator.id}
-                className={`flex items-center justify-between p-4 border rounded-lg transition-colors ${
+                className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
                   actuator.isActive ? 'bg-green-50 border-green-200' : 'bg-slate-50 border-slate-200'
                 }`}
               >
@@ -236,7 +236,7 @@ export default function ActuatorPanel() {
             )}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

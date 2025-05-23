@@ -325,10 +325,10 @@ export default function PublicDashboard() {
         </div>
 
         {/* Bottom Row - Controls, Camera, Health, Chat in horizontal layout */}
-        <div className="grid grid-cols-12 gap-6">
+        <div className="grid grid-cols-12 gap-6 mt-6">
           {/* Environmental Control System - wider */}
           <div className="col-span-4">
-            <Card className="bg-gradient-to-r from-slate-50 to-gray-100 border-slate-200 shadow-xl h-full">
+            <Card className="bg-gradient-to-r from-slate-50 to-gray-100 border-slate-200 shadow-xl">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center justify-between text-base">
                   <div className="flex items-center space-x-2">
@@ -340,7 +340,7 @@ export default function PublicDashboard() {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-0 pb-4">
                 <ActuatorPanel />
               </CardContent>
             </Card>
@@ -348,15 +348,17 @@ export default function PublicDashboard() {
 
           {/* Camera and Health side by side */}
           <div className="col-span-4 space-y-4">
-            <div className="h-[200px]">
+            <div>
               <CameraViewer analysis={latestAnalysis} />
             </div>
-            <HealthCard analysis={latestAnalysis} />
+            <div>
+              <HealthCard analysis={latestAnalysis} />
+            </div>
           </div>
 
           {/* Chat and Actions */}
           <div className="col-span-4 space-y-4">
-            <div className="h-[300px]">
+            <div className="h-[400px]">
               <AnalysisChat />
             </div>
             
