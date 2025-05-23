@@ -90,17 +90,20 @@ Green Genesis provides an intelligent farming ecosystem that:
 - WebSocket integration for real-time updates
 
 **Backend:**
-- Node.js 20 with Express.js framework
-- TypeScript with strict type checking
-- PostgreSQL with Drizzle ORM
-- WebSocket server for live communication
+- **Node.js Backend**: Express.js with TypeScript, Drizzle ORM
+- **Python Backend**: FastAPI with advanced AI/ML capabilities
+- PostgreSQL shared database with real-time synchronization
+- Dual WebSocket servers for live communication
 - Serial communication for Arduino integration
+- Microservices architecture for scalability
 
 **AI & Machine Learning:**
-- OpenAI GPT-4.1 for plant health analysis
-- Computer vision for image-based diagnostics
-- Natural language processing for chat assistance
-- Predictive algorithms for threshold monitoring
+- **OpenAI GPT-4 Vision**: Advanced plant image analysis
+- **Scikit-learn Models**: Predictive health scoring and growth analysis
+- **Computer Vision**: Real-time plant condition assessment
+- **Natural Language Processing**: Intelligent chat assistance
+- **Predictive Analytics**: Future condition forecasting
+- **Automated Decision Making**: Smart actuator control
 
 **Hardware Integration:**
 - Arduino Uno for sensor data collection

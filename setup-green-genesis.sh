@@ -335,16 +335,45 @@ check_api_keys() {
     fi
 }
 
+# Python backend setup
+setup_python_backend() {
+    log_step "Setting up Python backend..."
+    
+    # Check Python 3.8+
+    if command -v python3 &> /dev/null; then
+        PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
+        log_info "✅ Python version: $PYTHON_VERSION"
+        
+        # Create Python virtual environment
+        if [ ! -d "python-backend/venv" ]; then
+            log_info "📦 Creating Python virtual environment..."
+            cd python-backend
+            python3 -m venv venv
+            source venv/bin/activate
+            pip install --quiet --upgrade pip
+            pip install --quiet -r requirements.txt
+            cd ..
+            log_info "✅ Python backend dependencies installed"
+        else
+            log_info "✅ Python virtual environment already exists"
+        fi
+    else
+        log_warning "Python 3 not found - Python backend features will be limited"
+    fi
+}
+
 # Final setup summary
 show_summary() {
     echo ""
     echo "🎉 GREEN GENESIS SETUP COMPLETE! 🎉"
     echo "==================================="
     echo ""
-    echo -e "${GREEN}🚀 QUICK START:${NC}"
-    echo "1. Run: ${BLUE}./demo-green-genesis.sh${NC}"
-    echo "2. Open browser: ${BLUE}http://localhost:5000${NC}"
-    echo "3. Admin login: ${BLUE}Infomatrix / Infomatrix2025MKA${NC}"
+    echo -e "${GREEN}🚀 QUICK START OPTIONS:${NC}"
+    echo "1. Node.js Only: ${BLUE}./start-green-genesis.sh${NC}"
+    echo "2. With Python AI: ${BLUE}./python-backend/start-python-backend.sh${NC} (in separate terminal)"
+    echo "3. Web Dashboard: ${BLUE}http://localhost:5000${NC}"
+    echo "4. Python API Docs: ${BLUE}http://localhost:8000/py-docs${NC}"
+    echo "5. Admin login: ${BLUE}Infomatrix / Infomatrix2025MKA${NC}"
     echo ""
     echo -e "${GREEN}📸 CAMERA FEATURES:${NC}"
     if [[ "$IS_RASPBERRY_PI" == "true" ]]; then
@@ -386,6 +415,7 @@ main() {
     create_demo_script
     create_service
     check_api_keys
+    setup_python_backend
     show_summary
 }
 
