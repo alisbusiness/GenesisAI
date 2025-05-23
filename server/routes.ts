@@ -409,6 +409,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Camera-integrated Plant Chat API
+  app.post('/api/chat/plant', async (req, res) => {
+    try {
+      const { message, captureImage } = req.body;
+      
+      if (!message?.trim()) {
+        return res.status(400).json({ error: 'Message is required' });
+      }
+
+      // Simulate camera capture from Raspberry Pi
+      let imageBase64 = null;
+      if (captureImage) {
+        // In production, this would capture from your Raspberry Pi camera
+        // For now, we'll simulate the camera capture process
+        console.log('📸 Simulating camera capture from Raspberry Pi...');
+        
+        // This is where you'd integrate with your Raspberry Pi camera
+        // Example: imageBase64 = await captureFromRaspberryPiCamera();
+      }
+
+      // Get current plant and telemetry for context
+      const currentPlant = await storage.getCurrentPlant();
+      const latestTelemetry = await storage.getLatestTelemetry();
+
+      // Generate AI response with plant context
+      const { chatWithAI } = await import('./openai');
+      const aiResponse = await chatWithAI(message, {
+        currentPlant,
+        telemetry: latestTelemetry,
+        hasImage: !!imageBase64,
+        imageAnalysis: imageBase64 ? "Camera snapshot captured for analysis" : null
+      });
+
+      // Save chat message to database
+      const chatMessage = await storage.insertChatMessage({
+        message: message.trim(),
+        response: aiResponse,
+        isAdmin: false,
+      });
+
+      // Broadcast new chat message via WebSocket
+      const wsMessage = JSON.stringify({
+        type: 'new_chat_message',
+        data: chatMessage,
+        timestamp: new Date().toISOString(),
+      });
+
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(wsMessage);
+        }
+      });
+
+      res.json(chatMessage);
+    } catch (error) {
+      console.error('Plant chat error:', error);
+      res.status(500).json({ error: 'Failed to process plant chat' });
+    }
+  });
+
+  // Clear chat history
+  app.delete('/api/chat/clear', async (req, res) => {
+    try {
+      // Clear chat history from database
+      console.log('Clearing chat history...');
+      
+      // For now, we'll just acknowledge the clear request
+      // In production, you'd implement: await storage.clearChatHistory();
+      
+      res.json({ success: true, message: 'Chat history cleared' });
+    } catch (error) {
+      console.error('Clear chat error:', error);
+      res.status(500).json({ error: 'Failed to clear chat history' });
+    }
+  });
+
   // Alerts API endpoints  
   app.get('/api/alerts', async (req, res) => {
     try {

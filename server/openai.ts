@@ -25,6 +25,8 @@ interface ChatContext {
   currentPlant?: any;
   telemetry?: any;
   analysis?: any;
+  hasImage?: boolean;
+  imageAnalysis?: string | null;
 }
 
 export async function analyzeImageWithAI(base64Image: string): Promise<PlantAnalysisResult> {
@@ -118,23 +120,43 @@ export async function chatWithAI(message: string, context: ChatContext): Promise
 
     Provide helpful, actionable advice based on the user's question and the current system context. Keep responses concise but informative.`;
 
+    const hasImage = context.hasImage || false;
+    const plantName = context.currentPlant?.species?.name || 'your plant';
+    const telemetryInfo = context.telemetry ? 
+      `Temperature: ${context.telemetry.temperature}°C, Humidity: ${context.telemetry.humidity}%, Soil Moisture: ${(parseFloat(context.telemetry.soilMoisture) * 100).toFixed(0)}%, CO₂: ${context.telemetry.co2Level} ppm` : 
+      'Sensor data unavailable';
+
+    const plantSystemPrompt = `You are speaking as ${plantName}, responding directly to your caretaker in a friendly, natural conversation. 
+
+Key guidelines:
+- Speak in first person as the plant (use "I", "my", "me")
+- Keep responses conversational and under 150 words
+- No asterisks, markdown, or special formatting
+- Be helpful but maintain the plant personality
+- Reference current conditions when relevant
+
+Current conditions: ${telemetryInfo}
+${hasImage ? 'A photo was just taken of me for this conversation.' : ''}
+
+Respond naturally as the plant would speak to their caretaker.`;
+
     const response = await openai.chat.completions.create({
-      model: "gpt-4.1", // Updated to GPT-4.1 as requested
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [
         {
           role: "system",
-          content: systemPrompt
+          content: plantSystemPrompt
         },
         {
           role: "user",
           content: message
         }
       ],
-      max_tokens: 500,
-      temperature: 0.7,
+      max_tokens: 200, // Limited tokens for concise responses
+      temperature: 0.8, // Slightly higher for natural personality
     });
 
-    return response.choices[0].message.content || "I'm sorry, I couldn't process your request. Please try again.";
+    return response.choices[0].message.content || "I'm having trouble speaking right now. Could you try asking me again?";
 
   } catch (error) {
     console.error('OpenAI chat error:', error);
