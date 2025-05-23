@@ -382,6 +382,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Real-time AI Analysis endpoint
+  app.get('/api/analysis/realtime', async (req, res) => {
+    try {
+      const { aiAnalysisEngine } = await import('./aiAnalysis');
+      
+      // Get latest telemetry data
+      const latestTelemetry = await storage.getLatestTelemetry();
+      const currentPlant = await storage.getCurrentPlant();
+      
+      if (!latestTelemetry) {
+        return res.status(404).json({ error: 'No telemetry data available' });
+      }
+      
+      // Perform real-time AI analysis
+      const analysis = await aiAnalysisEngine.performAnalysis(latestTelemetry, currentPlant?.species);
+      
+      res.json(analysis);
+    } catch (error) {
+      console.error('Real-time analysis error:', error);
+      res.status(500).json({ error: 'Failed to perform AI analysis' });
+    }
+  });
+
   // Weather API endpoint
   app.get('/api/weather', async (req, res) => {
     try {
