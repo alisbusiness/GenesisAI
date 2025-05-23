@@ -21,6 +21,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { startSensorSimulation } = await import('./simulator');
   startSensorSimulation(wss);
 
+  // Initialize alert system
+  const { alertSystem } = await import('./alerts');
+  
+  // Run alert analysis every 2 minutes
+  setInterval(async () => {
+    try {
+      const newAlerts = await alertSystem.analyzeAndGenerateAlerts();
+      if (newAlerts.length > 0) {
+        // Broadcast new alerts to all clients
+        const message = JSON.stringify({
+          type: 'new_alerts',
+          data: newAlerts,
+          timestamp: new Date().toISOString()
+        });
+        
+        wss.clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error in alert analysis:', error);
+    }
+  }, 120000); // Every 2 minutes
+
   // Middleware for admin authentication
   const requireAdmin = async (req: any, res: any, next: any) => {
     const authHeader = req.headers.authorization;
@@ -352,6 +378,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(setting);
     } catch (error) {
       res.status(500).json({ error: 'Failed to update setting' });
+    }
+  });
+
+  // Weather API endpoint
+  app.get('/api/weather', async (req, res) => {
+    try {
+      const { weatherService } = await import('./weather');
+      const { city } = req.query;
+      
+      let weather;
+      if (city && typeof city === 'string') {
+        weather = await weatherService.getLocationWeather(city);
+      } else {
+        weather = await weatherService.getCurrentWeather();
+      }
+      
+      if (weather) {
+        res.json(weather);
+      } else {
+        res.json({ 
+          available: false,
+          message: 'Weather integration ready - add OpenWeatherMap API key to enable real-time weather data'
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching weather:', error);
+      res.status(500).json({ error: 'Failed to fetch weather data' });
+    }
+  });
+
+  // Alerts API endpoints  
+  app.get('/api/alerts', async (req, res) => {
+    try {
+      const { alertSystem } = await import('./alerts');
+      const { category, limit } = req.query;
+      
+      let alerts;
+      if (category && typeof category === 'string') {
+        alerts = alertSystem.getAlertsByCategory(category as any);
+      } else {
+        const limitNum = limit ? parseInt(limit as string) : 20;
+        alerts = alertSystem.getRecentAlerts(limitNum);
+      }
+      
+      res.json(alerts);
+    } catch (error) {
+      console.error('Error fetching alerts:', error);
+      res.status(500).json({ error: 'Failed to fetch alerts' });
+    }
+  });
+
+  app.post('/api/alerts/clear', requireAdmin, async (req, res) => {
+    try {
+      const { alertSystem } = await import('./alerts');
+      alertSystem.clearAlerts();
+      res.json({ message: 'Alerts cleared successfully' });
+    } catch (error) {
+      console.error('Error clearing alerts:', error);
+      res.status(500).json({ error: 'Failed to clear alerts' });
     }
   });
 
