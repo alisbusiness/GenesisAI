@@ -188,7 +188,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(chatMessages)
-      .orderBy(desc(chatMessages.timestamp))
+      .orderBy(chatMessages.timestamp) // Oldest first, newest last
       .limit(limit);
   }
 
