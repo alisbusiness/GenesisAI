@@ -28,22 +28,26 @@ export default function AdminLogin() {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { username: string; password: string }) => {
-      const response = await apiRequest('POST', '/api/admin/login', credentials);
+      const response = await apiRequest(
+        "POST",
+        "/api/admin/login",
+        credentials,
+      );
       return response.json() as Promise<LoginResponse>;
     },
     onSuccess: (data) => {
       if (data.success) {
         // Store the token in localStorage
-        localStorage.setItem('admin_token', data.token);
-        localStorage.setItem('admin_user', JSON.stringify(data.admin));
-        
+        localStorage.setItem("admin_token", data.token);
+        localStorage.setItem("admin_user", JSON.stringify(data.admin));
+
         toast({
           title: "Login Successful",
           description: `Welcome back, ${data.admin.username}!`,
         });
-        
+
         // Redirect to admin settings
-        setLocation('/admin/settings');
+        setLocation("/admin/settings");
       }
     },
     onError: (error: any) => {
@@ -72,13 +76,15 @@ export default function AdminLogin() {
               Back to Dashboard
             </Button>
           </Link>
-          
+
           <div className="flex items-center justify-center space-x-2 mb-4">
             <div className="bg-green-600 rounded-lg p-3">
               <Sprout className="h-8 w-8 text-white" />
             </div>
             <div className="text-left">
-              <h1 className="text-2xl font-bold text-slate-900">Green Genesis</h1>
+              <h1 className="text-2xl font-bold text-slate-900">
+                Green Genesis
+              </h1>
               <p className="text-sm text-slate-600">Admin Access</p>
             </div>
           </div>
@@ -138,22 +144,19 @@ export default function AdminLogin() {
               <div className="flex items-start space-x-3">
                 <Lock className="h-5 w-5 text-blue-600 mt-0.5" />
                 <div>
-                  <h4 className="font-medium text-blue-900">Admin Access Required</h4>
+                  <h4 className="font-medium text-blue-900">
+                    Admin Access Required
+                  </h4>
                   <p className="text-sm text-blue-700 mt-1">
-                    Administrator access provides full control over actuators, system settings, 
-                    plant configurations, and sensor thresholds.
+                    Administrator access provides full control over actuators,
+                    system settings, plant configurations, and sensor
+                    thresholds.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg">
-              <h5 className="font-medium text-slate-900 text-sm mb-2">Default Credentials:</h5>
-              <div className="text-sm text-slate-600 space-y-1">
-                <div>Username: <code className="bg-slate-200 px-1 rounded">Infomatrix</code></div>
-                <div>Password: <code className="bg-slate-200 px-1 rounded">Infomatrix2025MKA</code></div>
-              </div>
-            </div>
+            <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
           </CardContent>
         </Card>
 

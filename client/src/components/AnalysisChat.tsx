@@ -135,7 +135,7 @@ export default function AnalysisChat() {
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              GPT-4 Powered
+              GPT-4.1 Powered
             </Badge>
           </div>
         </CardTitle>

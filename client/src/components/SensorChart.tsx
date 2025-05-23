@@ -78,62 +78,199 @@ export default function SensorChart() {
           </div>
         ) : chartData.length > 0 ? (
           <>
-            {/* Chart */}
-            <div className="h-64 mb-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis 
-                    dataKey="time" 
-                    stroke="#64748b"
-                    fontSize={12}
-                    interval="preserveStartEnd"
-                  />
-                  <YAxis stroke="#64748b" fontSize={12} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'white', 
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                    }}
-                    labelStyle={{ color: '#374151' }}
-                  />
-                  <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="temperature" 
-                    stroke="#dc2626" 
-                    strokeWidth={2}
-                    dot={false}
-                    name="Temperature (°C)"
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="humidity" 
-                    stroke="#2563eb" 
-                    strokeWidth={2}
-                    dot={false}
-                    name="Humidity (%)"
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="soilMoisture" 
-                    stroke="#f59e0b" 
-                    strokeWidth={2}
-                    dot={false}
-                    name="Soil Moisture (%)"
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="co2" 
-                    stroke="#059669" 
-                    strokeWidth={2}
-                    dot={false}
-                    name="CO₂ (ppm)"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            {/* Individual Sensor Charts */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Temperature Chart */}
+              <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+                <h3 className="text-lg font-semibold text-red-700 mb-3 flex items-center">
+                  <div className="w-3 h-3 bg-red-600 rounded-full mr-2" />
+                  Temperature Trend
+                </h3>
+                <div className="h-40">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#fecaca" />
+                      <XAxis 
+                        dataKey="time" 
+                        stroke="#991b1b"
+                        fontSize={11}
+                        interval="preserveStartEnd"
+                      />
+                      <YAxis 
+                        stroke="#991b1b" 
+                        fontSize={11}
+                        domain={['dataMin - 2', 'dataMax + 2']}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#fef2f2', 
+                          border: '1px solid #fecaca',
+                          borderRadius: '6px',
+                        }}
+                        formatter={(value) => [`${value}°C`, 'Temperature']}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="temperature" 
+                        stroke="#dc2626" 
+                        strokeWidth={3}
+                        dot={{ fill: '#dc2626', strokeWidth: 2, r: 3 }}
+                        activeDot={{ r: 5, fill: '#b91c1c' }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="text-center mt-2">
+                  <span className="text-2xl font-bold text-red-600">
+                    {latestReading ? parseFloat(latestReading.temperature).toFixed(1) : '--'}°C
+                  </span>
+                  <p className="text-sm text-red-600">Current Temperature</p>
+                </div>
+              </div>
+
+              {/* Humidity Chart */}
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <h3 className="text-lg font-semibold text-blue-700 mb-3 flex items-center">
+                  <div className="w-3 h-3 bg-blue-600 rounded-full mr-2" />
+                  Humidity Trend
+                </h3>
+                <div className="h-40">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#bfdbfe" />
+                      <XAxis 
+                        dataKey="time" 
+                        stroke="#1d4ed8"
+                        fontSize={11}
+                        interval="preserveStartEnd"
+                      />
+                      <YAxis 
+                        stroke="#1d4ed8" 
+                        fontSize={11}
+                        domain={[0, 100]}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#eff6ff', 
+                          border: '1px solid #bfdbfe',
+                          borderRadius: '6px',
+                        }}
+                        formatter={(value) => [`${value}%`, 'Humidity']}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="humidity" 
+                        stroke="#2563eb" 
+                        strokeWidth={3}
+                        dot={{ fill: '#2563eb', strokeWidth: 2, r: 3 }}
+                        activeDot={{ r: 5, fill: '#1d4ed8' }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="text-center mt-2">
+                  <span className="text-2xl font-bold text-blue-600">
+                    {latestReading ? parseFloat(latestReading.humidity).toFixed(0) : '--'}%
+                  </span>
+                  <p className="text-sm text-blue-600">Current Humidity</p>
+                </div>
+              </div>
+
+              {/* Soil Moisture Chart */}
+              <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                <h3 className="text-lg font-semibold text-amber-700 mb-3 flex items-center">
+                  <div className="w-3 h-3 bg-amber-600 rounded-full mr-2" />
+                  Soil Moisture Trend
+                </h3>
+                <div className="h-40">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#fde68a" />
+                      <XAxis 
+                        dataKey="time" 
+                        stroke="#d97706"
+                        fontSize={11}
+                        interval="preserveStartEnd"
+                      />
+                      <YAxis 
+                        stroke="#d97706" 
+                        fontSize={11}
+                        domain={[0, 100]}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#fffbeb', 
+                          border: '1px solid #fde68a',
+                          borderRadius: '6px',
+                        }}
+                        formatter={(value) => [`${value}%`, 'Soil Moisture']}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="soilMoisture" 
+                        stroke="#f59e0b" 
+                        strokeWidth={3}
+                        dot={{ fill: '#f59e0b', strokeWidth: 2, r: 3 }}
+                        activeDot={{ r: 5, fill: '#d97706' }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="text-center mt-2">
+                  <span className="text-2xl font-bold text-amber-600">
+                    {latestReading ? (parseFloat(latestReading.soilMoisture) * 100).toFixed(0) : '--'}%
+                  </span>
+                  <p className="text-sm text-amber-600">Current Soil Moisture</p>
+                </div>
+              </div>
+
+              {/* CO2 Chart */}
+              <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                <h3 className="text-lg font-semibold text-green-700 mb-3 flex items-center">
+                  <div className="w-3 h-3 bg-green-600 rounded-full mr-2" />
+                  CO₂ Level Trend
+                </h3>
+                <div className="h-40">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#bbf7d0" />
+                      <XAxis 
+                        dataKey="time" 
+                        stroke="#059669"
+                        fontSize={11}
+                        interval="preserveStartEnd"
+                      />
+                      <YAxis 
+                        stroke="#059669" 
+                        fontSize={11}
+                        domain={['dataMin - 50', 'dataMax + 50']}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#f0fdf4', 
+                          border: '1px solid #bbf7d0',
+                          borderRadius: '6px',
+                        }}
+                        formatter={(value) => [`${value} ppm`, 'CO₂ Level']}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="co2" 
+                        stroke="#059669" 
+                        strokeWidth={3}
+                        dot={{ fill: '#059669', strokeWidth: 2, r: 3 }}
+                        activeDot={{ r: 5, fill: '#047857' }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="text-center mt-2">
+                  <span className="text-2xl font-bold text-green-600">
+                    {latestReading ? latestReading.co2Level : '--'} ppm
+                  </span>
+                  <p className="text-sm text-green-600">Current CO₂ Level</p>
+                </div>
+              </div>
             </div>
 
             {/* Current Values Summary */}
