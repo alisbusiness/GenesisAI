@@ -1,8 +1,9 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Maximize2, RefreshCw, Brain, Archive } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Camera, Wifi, WifiOff, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import plantPlaceholder from "@assets/4d10f3c5-2653-423c-8319-9d47bef1e5aa.jpeg";
 
 interface CameraViewerProps {
   analysis?: {
@@ -15,120 +16,99 @@ interface CameraViewerProps {
 }
 
 export default function CameraViewer({ analysis }: CameraViewerProps) {
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [cameraConnected, setCameraConnected] = useState(true);
 
-  const handleCaptureImage = async () => {
+  const handleCapture = () => {
     setIsCapturing(true);
-    try {
-      // This would interface with the camera API
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate capture
-      // In reality, this would trigger the /api/health/analyze endpoint
-      console.log('Image captured and sent for analysis');
-    } catch (error) {
-      console.error('Failed to capture image:', error);
-    } finally {
+    // Simulate camera capture
+    setTimeout(() => {
       setIsCapturing(false);
-    }
+    }, 2000);
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="h-full">
+      <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Camera className="h-5 w-5 text-green-600" />
-            <span>Live Camera Feed</span>
+            <Camera className="h-5 w-5 text-blue-600" />
+            <span>Plant Camera Feed</span>
+            <Badge variant={cameraConnected ? "default" : "destructive"} className="text-xs">
+              {cameraConnected ? (
+                <>
+                  <Wifi className="h-3 w-3 mr-1" />
+                  Live
+                </>
+              ) : (
+                <>
+                  <WifiOff className="h-3 w-3 mr-1" />
+                  Offline
+                </>
+              )}
+            </Badge>
           </div>
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-              <span className="text-sm text-slate-600">Live</span>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => setIsFullscreen(!isFullscreen)}>
-              <Maximize2 className="h-4 w-4" />
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCapture}
+            disabled={isCapturing}
+            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+          >
+            {isCapturing ? (
+              <RefreshCw className="h-4 w-4 animate-spin" />
+            ) : (
+              <Camera className="h-4 w-4" />
+            )}
+          </Button>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
+      
+      <CardContent className="p-4">
         <div className="relative">
-          {/* Camera Feed - Replace with actual camera stream */}
-          <div className="relative bg-slate-900 aspect-video">
-            <img 
-              src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=800&h=450" 
-              alt="Live greenhouse camera feed" 
+          {/* Camera Feed Display */}
+          <div className="aspect-video bg-slate-100 rounded-lg overflow-hidden relative">
+            <img
+              src={plantPlaceholder}
+              alt="Plant Camera Feed"
               className="w-full h-full object-cover"
             />
             
-            {/* Live indicator overlay */}
-            <div className="absolute top-4 left-4 bg-red-600/90 backdrop-blur-sm text-white px-3 py-1 rounded-lg text-sm font-medium flex items-center space-x-2">
-              <Archive className="h-3 w-3 animate-pulse" />
-              <span>LIVE</span>
+            {/* Camera Status Overlay */}
+            <div className="absolute top-2 left-2">
+              <Badge variant={cameraConnected ? "default" : "destructive"} className="text-xs">
+                {cameraConnected ? "🟢 LIVE" : "🔴 OFFLINE"}
+              </Badge>
             </div>
-            
-            {/* Timestamp overlay */}
-            <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-lg text-sm">
-              {new Date().toLocaleTimeString()}
+
+            {/* Timestamp Overlay */}
+            <div className="absolute bottom-2 left-2">
+              <Badge variant="secondary" className="text-xs bg-black/70 text-white">
+                {new Date().toLocaleString()}
+              </Badge>
             </div>
-            
-            {/* AI Analysis overlay */}
-            {analysis && (
-              <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg p-3 max-w-xs">
-                <div className="flex items-center space-x-2 mb-2">
-                  <Brain className="h-4 w-4 text-green-600" />
-                  <span className="text-sm font-medium text-slate-900">AI Analysis</span>
-                </div>
-                <p className="text-sm text-slate-700 mb-2 line-clamp-2">
-                  {analysis.summary}
-                </p>
-                <div className="flex items-center justify-between">
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                    {analysis.healthScore}% Healthy
-                  </Badge>
-                  <span className="text-xs text-slate-500">
-                    {(parseFloat(analysis.confidence) * 100).toFixed(0)}% confident
-                  </span>
+
+            {/* Capturing Overlay */}
+            {isCapturing && (
+              <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                <div className="flex flex-col items-center space-y-2">
+                  <Camera className="h-8 w-8 text-blue-600 animate-pulse" />
+                  <span className="text-sm font-medium text-blue-600">Capturing...</span>
                 </div>
               </div>
             )}
-            
-            {/* Plant detection boxes (simulated) */}
-            <div className="absolute top-20 right-20 w-24 h-24 border-2 border-green-500 rounded">
-              <div className="bg-green-500 text-white text-xs px-1 rounded">Tomato</div>
-            </div>
-            <div className="absolute bottom-20 left-20 w-20 h-20 border-2 border-blue-500 rounded">
-              <div className="bg-blue-500 text-white text-xs px-1 rounded">Leaves</div>
-            </div>
           </div>
-        </div>
-        
-        {/* Camera Controls */}
-        <div className="p-4 bg-slate-50 border-t border-slate-200">
-          <div className="flex items-center justify-between">
-            <div className="flex space-x-2">
-              <Button 
-                size="sm" 
-                onClick={handleCaptureImage}
-                disabled={isCapturing}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                {isCapturing ? (
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Camera className="h-4 w-4 mr-2" />
-                )}
-                {isCapturing ? 'Analyzing...' : 'Capture & Analyze'}
-              </Button>
-              <Button variant="outline" size="sm">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh Feed
-              </Button>
-            </div>
-            
-            <div className="text-sm text-slate-500">
-              Zone A - Main Growing Area
-            </div>
+
+          {/* Camera Info */}
+          <div className="mt-3 text-center">
+            <p className="text-sm text-slate-600">
+              📸 Raspberry Pi Camera - Auto-capture enabled for plant chat
+            </p>
+            {analysis && (
+              <p className="text-xs text-green-600 mt-1">
+                Last analysis: Health {analysis.healthScore}% • {analysis.confidence} confidence
+              </p>
+            )}
           </div>
         </div>
       </CardContent>
