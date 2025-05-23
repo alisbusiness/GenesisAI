@@ -89,7 +89,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const analysis = await analyzeImageWithAI(imageData);
-      const saved = await storage.insertAiAnalysis(analysis);
+      const saved = await storage.insertAiAnalysis({
+        summary: analysis.summary,
+        healthScore: analysis.healthScore,
+        recommendations: analysis.recommendations,
+        issues: analysis.issues,
+        confidence: analysis.confidence.toString()
+      });
 
       // Broadcast to all WebSocket clients
       const message = JSON.stringify({
