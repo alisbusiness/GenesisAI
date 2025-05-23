@@ -149,15 +149,15 @@ export default function PublicDashboard() {
         </div>
       </nav>
 
-      <main className="w-full px-8 py-6 space-y-8 min-h-screen">
+      <main className="w-full max-w-[1400px] mx-auto px-8 py-8 space-y-12 min-h-screen">
         {/* Championship Dashboard Header */}
-        <div className="text-center space-y-3 mb-10">
-          <h2 className="text-5xl font-bold text-slate-800 tracking-tight">Precision Farming Command Center</h2>
-          <p className="text-xl text-slate-600 font-medium">Real-time AI monitoring, automated control, and predictive analytics</p>
+        <div className="text-center space-y-4 mb-12">
+          <h2 className="text-4xl font-bold text-slate-800 tracking-tight">Precision Farming Command Center</h2>
+          <p className="text-lg text-slate-600 font-medium">Real-time AI monitoring, automated control, and predictive analytics</p>
         </div>
 
         {/* Key Performance Indicators - Optimized for 1440p */}
-        <div className="grid grid-cols-4 gap-8 mb-10">
+        <div className="grid grid-cols-4 gap-8 mb-12">
           <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0 shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105">
             <CardContent className="p-8">
               <div className="flex items-center justify-between">
@@ -212,31 +212,31 @@ export default function PublicDashboard() {
         </div>
 
         {/* Main Dashboard Grid - Optimized for 1440p */}
-        <div className="grid grid-cols-12 gap-8">
+        <div className="grid grid-cols-12 gap-10">
           {/* Left Column - Live Camera & Health */}
-          <div className="col-span-3 space-y-8">
+          <div className="col-span-3 space-y-10">
             <CameraViewer analysis={latestAnalysis} />
             <HealthCard analysis={latestAnalysis} />
             
             {/* Enhanced Quick Actions */}
             <Card className="bg-gradient-to-br from-emerald-50 to-teal-100 border-emerald-200 shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-emerald-800 flex items-center text-xl">
-                  <Zap className="h-6 w-6 mr-3" />
+              <CardHeader className="pb-4">
+                <CardTitle className="text-emerald-800 flex items-center text-lg">
+                  <Zap className="h-5 w-5 mr-3" />
                   AI Actions
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <Button className="w-full bg-emerald-600 hover:bg-emerald-700 h-12 text-base font-semibold">
-                  <Camera className="h-5 w-5 mr-3" />
+              <CardContent className="space-y-3 pt-0">
+                <Button className="w-full bg-emerald-600 hover:bg-emerald-700 h-11 text-sm font-semibold">
+                  <Camera className="h-4 w-4 mr-2" />
                   Health Scan
                 </Button>
-                <Button variant="outline" className="w-full hover:bg-emerald-50 h-12 text-base">
-                  <Brain className="h-5 w-5 mr-3" />
+                <Button variant="outline" className="w-full hover:bg-emerald-50 h-11 text-sm">
+                  <Brain className="h-4 w-4 mr-2" />
                   Growth Prediction
                 </Button>
-                <Button variant="outline" className="w-full hover:bg-emerald-50 h-12 text-base">
-                  <Target className="h-5 w-5 mr-3" />
+                <Button variant="outline" className="w-full hover:bg-emerald-50 h-11 text-sm">
+                  <Target className="h-4 w-4 mr-2" />
                   Auto-Optimize
                 </Button>
               </CardContent>
@@ -244,87 +244,87 @@ export default function PublicDashboard() {
           </div>
 
           {/* Center Column - Main Analytics */}
-          <div className="col-span-6 space-y-8">
+          <div className="col-span-6 space-y-10">
             {/* Enhanced Sensor Charts */}
-            <div className="h-96">
+            <div className="h-[420px]">
               <SensorChart />
             </div>
             
             {/* Environmental Control System */}
             <Card className="bg-gradient-to-r from-slate-50 to-gray-100 border-slate-200 shadow-xl">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between text-xl">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center justify-between text-lg">
                   <div className="flex items-center space-x-3">
-                    <Settings className="h-6 w-6 text-slate-700" />
-                    <span>Intelligent Environment Control</span>
-                    <Badge variant="secondary" className="bg-green-100 text-green-700 text-sm px-3 py-1">
+                    <Settings className="h-5 w-5 text-slate-700" />
+                    <span>Environment Control</span>
+                    <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs px-2 py-1">
                       AI Managed
                     </Badge>
                   </div>
-                  <div className="text-base text-slate-600">
-                    Next optimization in: 15 min
+                  <div className="text-sm text-slate-600">
+                    Next optimization: 15 min
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="pt-0">
                 <ActuatorPanel />
               </CardContent>
             </Card>
 
-            {/* Real-time Environment Status - Larger Cards */}
-            <div className="grid grid-cols-4 gap-6">
+            {/* Real-time Environment Status - Better spaced cards */}
+            <div className="grid grid-cols-4 gap-4">
               <Card className="bg-gradient-to-br from-red-50 to-pink-100 border-red-200 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-6">
+                <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-base font-semibold text-red-700 mb-2">Temperature</p>
-                      <p className="text-3xl font-bold text-red-900">
+                      <p className="text-sm font-semibold text-red-700 mb-1">Temperature</p>
+                      <p className="text-2xl font-bold text-red-900">
                         {latestTelemetry ? parseFloat(latestTelemetry.temperature).toFixed(1) : '--'}°C
                       </p>
                     </div>
-                    <Thermometer className="h-10 w-10 text-red-600" />
+                    <Thermometer className="h-8 w-8 text-red-600" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-gradient-to-br from-blue-50 to-cyan-100 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-6">
+                <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-base font-semibold text-blue-700 mb-2">Humidity</p>
-                      <p className="text-3xl font-bold text-blue-900">
+                      <p className="text-sm font-semibold text-blue-700 mb-1">Humidity</p>
+                      <p className="text-2xl font-bold text-blue-900">
                         {latestTelemetry ? parseFloat(latestTelemetry.humidity).toFixed(0) : '--'}%
                       </p>
                     </div>
-                    <Droplets className="h-10 w-10 text-blue-600" />
+                    <Droplets className="h-8 w-8 text-blue-600" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-gradient-to-br from-amber-50 to-yellow-100 border-amber-200 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-6">
+                <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-base font-semibold text-amber-700 mb-2">Soil Moisture</p>
-                      <p className="text-3xl font-bold text-amber-900">
+                      <p className="text-sm font-semibold text-amber-700 mb-1">Soil Moisture</p>
+                      <p className="text-2xl font-bold text-amber-900">
                         {latestTelemetry ? (parseFloat(latestTelemetry.soilMoisture) * 100).toFixed(0) : '--'}%
                       </p>
                     </div>
-                    <Sprout className="h-10 w-10 text-amber-600" />
+                    <Sprout className="h-8 w-8 text-amber-600" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-6">
+                <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-base font-semibold text-green-700 mb-2">CO₂ Level</p>
-                      <p className="text-3xl font-bold text-green-900">
+                      <p className="text-sm font-semibold text-green-700 mb-1">CO₂ Level</p>
+                      <p className="text-2xl font-bold text-green-900">
                         {latestTelemetry ? latestTelemetry.co2Level : '--'} ppm
                       </p>
                     </div>
-                    <Wind className="h-10 w-10 text-green-600" />
+                    <Wind className="h-8 w-8 text-green-600" />
                   </div>
                 </CardContent>
               </Card>
@@ -332,8 +332,8 @@ export default function PublicDashboard() {
           </div>
 
           {/* Right Column - AI Chat & Alerts */}
-          <div className="col-span-3 space-y-8">
-            <div className="h-96">
+          <div className="col-span-3 space-y-10">
+            <div className="h-[420px]">
               <AnalysisChat />
             </div>
             <AlertsPanel />
@@ -341,13 +341,13 @@ export default function PublicDashboard() {
         </div>
 
         {/* Championship Features Banner - Optimized for 1440p */}
-        <Card className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white border-0 shadow-2xl">
-          <CardContent className="p-8">
-            <div className="text-center space-y-6">
-              <h3 className="text-4xl font-bold tracking-tight">🏆 Championship Features Active</h3>
-              <div className="grid grid-cols-4 gap-8 text-lg font-medium">
+        <Card className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white border-0 shadow-2xl mt-16">
+          <CardContent className="p-10">
+            <div className="text-center space-y-8">
+              <h3 className="text-3xl font-bold tracking-tight">🏆 Championship Features Active</h3>
+              <div className="grid grid-cols-4 gap-8 text-base font-medium">
                 <div className="flex items-center justify-center space-x-3">
-                  <span className="text-2xl">✅</span>
+                  <span className="text-xl">✅</span>
                   <span>AI Plant Communication</span>
                 </div>
                 <div className="flex items-center justify-center space-x-3">
